@@ -7,7 +7,7 @@ app.use(express.json());
 
 const fs = require('fs');
 
-const SftpClient = require('ssh2-sftp-client');
+const ftp = require('basic-ftp');
 
 const {
     Client,
@@ -68,15 +68,16 @@ const rest = new REST({ version: '10' })
 
 async function adicionarCoinsFTP(steamID, coins) {
 
-    const sftp = new SftpClient();
+    const clientFTP = new ftp.Client();
 
     try {
 
-        await sftp.connect({
+        await clientFTP.access({
             host: process.env.FTP_HOST,
             port: Number(process.env.FTP_PORT),
-            username: process.env.FTP_USER,
-            password: process.env.FTP_PASS
+            user: process.env.FTP_USER,
+            password: process.env.FTP_PASS,
+            secure: false
         });
 
         const caminhoArquivo =
@@ -86,9 +87,9 @@ async function adicionarCoinsFTP(steamID, coins) {
         const arquivoLocal =
 `${steamID}.json`;
 
-        await sftp.fastGet(
-            caminhoArquivo,
-            arquivoLocal
+        await clientFTP.downloadTo(
+            arquivoLocal,
+            caminhoArquivo
         );
 
         const dados =
@@ -103,7 +104,7 @@ JSON.parse(
             JSON.stringify(dados, null, 4)
         );
 
-        await sftp.fastPut(
+        await clientFTP.uploadFrom(
             arquivoLocal,
             caminhoArquivo
         );
@@ -112,7 +113,7 @@ JSON.parse(
 `${coins} coins adicionadas para ${steamID}`
         );
 
-        await sftp.end();
+        clientFTP.close();
 
     } catch (err) {
 
