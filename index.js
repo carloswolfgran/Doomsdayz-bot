@@ -201,11 +201,72 @@ app.get('/', (req, res) => {
 
 app.post('/webhook', async (req, res) => {
 
-    console.log('Webhook recebido');
+    try {
 
-    console.log(req.body);
+        console.log('Webhook recebido');
 
-    res.sendStatus(200);
+        console.log(req.body);
+
+        const paymentId = req.body.data.id;
+
+        console.log(`Pagamento ID: ${paymentId}`);
+
+        const pagamento =
+        await paymentClient.get({
+            id: paymentId
+        });
+
+        console.log(pagamento);
+
+        if (pagamento.status === 'approved') {
+
+            console.log('Pagamento aprovado');
+
+            const steamID =
+            "76561198792771416";
+
+            const coins =
+            Number(pagamento.transaction_amount);
+
+            await adicionarCoinsFTP(
+                steamID,
+                coins
+            );
+
+            const canal =
+            await client.channels.fetch(
+                '1506835924221169774'
+            );
+
+            await canal.send(
+
+`✅ PAGAMENTO APROVADO
+
+💰 ${coins} coins adicionadas.
+
+🧾 Pagamento ID:
+${paymentId}
+
+🔥 Obrigado por apoiar o DoomsDayZ!`
+
+            );
+
+            console.log(
+`${coins} coins entregues`
+            );
+
+        }
+
+        res.sendStatus(200);
+
+    } catch (err) {
+
+        console.log(err);
+
+        res.sendStatus(500);
+
+    }
+
 });
 
 app.listen(process.env.PORT || 3000, () => {
