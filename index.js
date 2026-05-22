@@ -77,7 +77,7 @@ async function adicionarCoinsFTP(steamID, coins) {
             port: Number(process.env.FTP_PORT),
             user: process.env.FTP_USER,
             password: process.env.FTP_PASS,
-            secure: false
+            secure: true
         });
 
         console.log('Conectado no FTP');
