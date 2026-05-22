@@ -1,5 +1,10 @@
 require('dotenv').config();
 
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
 const fs = require('fs');
 
 const SftpClient = require('ssh2-sftp-client');
@@ -188,6 +193,23 @@ Após pagar o sistema confirmará automaticamente.`,
 
         }
     }
+});
+
+app.get('/', (req, res) => {
+    res.send('Bot online');
+});
+
+app.post('/webhook', async (req, res) => {
+
+    console.log('Webhook recebido');
+
+    console.log(req.body);
+
+    res.sendStatus(200);
+});
+
+app.listen(process.env.PORT || 3000, () => {
+    console.log('Servidor web iniciado');
 });
 
 client.login(process.env.DISCORD_TOKEN);
