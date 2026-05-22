@@ -132,7 +132,7 @@ client.on('interactionCreate', async interaction => {
 
     if (interaction.commandName === 'coins') {
 
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: true });
 
         const quantidade =
         interaction.options.getInteger('quantidade');
@@ -167,7 +167,7 @@ new AttachmentBuilder(buffer, {
     name: 'pix.png'
 });
 
-            await interaction.editReply({
+            return await interaction.editReply({
 
                 content:
 `💰 PAGAMENTO PIX GERADO
@@ -192,7 +192,7 @@ Após pagar o sistema confirmará automaticamente.`,
 
             console.log(error);
 
-            await interaction.editReply({
+            return await interaction.editReply({
                 content:
 'Erro ao gerar pagamento.'
             });
