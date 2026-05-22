@@ -7,7 +7,7 @@ app.use(express.json());
 
 const fs = require('fs');
 
-const SftpClient = require('ssh2-sftp-client');
+const ftp = require('basic-ftp');
 
 const {
     Client,
@@ -68,11 +68,62 @@ const rest = new REST({ version: '10' })
 
 async function adicionarCoinsFTP(steamID, coins) {
 
-    console.log(
-`Simulando entrega de ${coins} coins para ${steamID}`
-    );
+    const clientFTP = new ftp.Client();
 
-    // FUTURAMENTE VOCÊ PODE COLOCAR FTP AQUI
+    try {
+
+        await clientFTP.access({
+            host: process.env.FTP_HOST,
+            port: Number(process.env.FTP_PORT),
+            user: process.env.FTP_USER,
+            password: process.env.FTP_PASS,
+            secure: false
+        });
+
+        console.log('Conectado no FTP');
+
+        const caminhoArquivo =
+'/profiles/FlameHost/Addons/Shop/Players/PlayerDatabase/' +
+`${steamID}.json`;
+
+        const arquivoLocal =
+`${steamID}.json`;
+
+        await clientFTP.downloadTo(
+            arquivoLocal,
+            caminhoArquivo
+        );
+
+        console.log('Arquivo baixado');
+
+        const dados =
+JSON.parse(
+    fs.readFileSync(arquivoLocal)
+);
+
+        dados.Balance += coins;
+
+        fs.writeFileSync(
+            arquivoLocal,
+            JSON.stringify(dados, null, 4)
+        );
+
+        await clientFTP.uploadFrom(
+            arquivoLocal,
+            caminhoArquivo
+        );
+
+        console.log(
+`${coins} coins adicionadas para ${steamID}`
+        );
+
+        clientFTP.close();
+
+    } catch (err) {
+
+        console.log(err);
+
+    }
 }
 
 client.on('interactionCreate', async interaction => {
@@ -197,7 +248,7 @@ app.post('/webhook', async (req, res) => {
 
 `✅ PAGAMENTO APROVADO
 
-💰 ${coins} coins adicionadas.
+💰 ${coins} DayZ Coins adicionadas.
 
 🧾 Pagamento ID:
 ${paymentId}
