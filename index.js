@@ -1,3 +1,80 @@
+require('dotenv').config();
+
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+const fs = require('fs');
+
+const SftpClient = require('ssh2-sftp-client');
+
+const {
+    Client,
+    GatewayIntentBits,
+    SlashCommandBuilder,
+    REST,
+    Routes,
+    AttachmentBuilder
+} = require('discord.js');
+
+const { MercadoPagoConfig, Payment } = require('mercadopago');
+
+const clientMP = new MercadoPagoConfig({
+    accessToken: process.env.MP_ACCESS_TOKEN
+});
+
+const paymentClient = new Payment(clientMP);
+
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds]
+});
+
+const commands = [
+    new SlashCommandBuilder()
+        .setName('coins')
+        .setDescription('Comprar coins')
+        .addIntegerOption(option =>
+            option.setName('quantidade')
+                .setDescription('Quantidade')
+                .setRequired(true)
+        )
+].map(command => command.toJSON());
+
+const rest = new REST({ version: '10' })
+.setToken(process.env.DISCORD_TOKEN);
+
+(async () => {
+
+    try {
+
+        await rest.put(
+            Routes.applicationGuildCommands(
+                process.env.CLIENT_ID,
+                process.env.GUILD_ID
+            ),
+            { body: commands }
+        );
+
+        console.log('Comandos registrados.');
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+})();
+
+async function adicionarCoinsFTP(steamID, coins) {
+
+    console.log(
+`Simulando entrega de ${coins} coins para ${steamID}`
+    );
+
+    // FUTURAMENTE VOCÊ PODE COLOCAR FTP AQUI
+}
+
 client.on('interactionCreate', async interaction => {
 
     if (!interaction.isChatInputCommand()) return;
@@ -72,3 +149,83 @@ Após pagar o sistema confirmará automaticamente.`,
         }
     }
 });
+
+app.get('/', (req, res) => {
+    res.send('Bot online');
+});
+
+app.post('/webhook', async (req, res) => {
+
+    try {
+
+        console.log('Webhook recebido');
+
+        console.log(req.body);
+
+        const paymentId = req.body.data.id;
+
+        console.log(`Pagamento ID: ${paymentId}`);
+
+        const pagamento =
+        await paymentClient.get({
+            id: paymentId
+        });
+
+        console.log(pagamento);
+
+        if (pagamento.status === 'approved') {
+
+            console.log('Pagamento aprovado');
+
+            const steamID =
+            "76561198792771416";
+
+            const coins =
+            Number(pagamento.transaction_amount) * 1000;
+
+            await adicionarCoinsFTP(
+                steamID,
+                coins
+            );
+
+            const canal =
+            await client.channels.fetch(
+                '1506835924221169774'
+            );
+
+            await canal.send(
+
+`✅ PAGAMENTO APROVADO
+
+💰 ${coins} coins adicionadas.
+
+🧾 Pagamento ID:
+${paymentId}
+
+🔥 Obrigado por apoiar o DoomsDayZ!`
+
+            );
+
+            console.log(
+`${coins} coins entregues`
+            );
+
+        }
+
+        res.sendStatus(200);
+
+    } catch (err) {
+
+        console.log(err);
+
+        res.sendStatus(500);
+
+    }
+
+});
+
+app.listen(process.env.PORT || 3000, () => {
+    console.log('Servidor web iniciado');
+});
+
+client.login(process.env.DISCORD_TOKEN);
