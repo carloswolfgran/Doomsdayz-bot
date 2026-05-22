@@ -226,7 +226,7 @@ app.post('/webhook', async (req, res) => {
             "76561198792771416";
 
             const coins =
-            Number(pagamento.transaction_amount);
+            Number(pagamento.transaction_amount) * 1000;
 
             await adicionarCoinsFTP(
                 steamID,
@@ -242,7 +242,7 @@ app.post('/webhook', async (req, res) => {
 
 `✅ PAGAMENTO APROVADO
 
-💰 ${coins} coins adicionadas.
+💰 ${coins} DayZ Coins adicionadas.
 
 🧾 Pagamento ID:
 ${paymentId}
