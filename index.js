@@ -199,6 +199,19 @@ client.once('ready', async () => {
 
 💳 Após digitar o comando:
 
+💬 EXEMPLOS:
+
+/vip 1 = SOLDADO
+/vip 2 = CABO
+/vip 3 = SARGENTO
+/vip 4 = OFICIAL
+/vip 5 = TENENTE
+/vip 6 = 1° TENENTE
+
+✅ O bot irá gerar um PIX automático
+✅ Faça o pagamento
+✅ O sistema confirma automaticamente
+
 ✅ O bot irá gerar um PIX automático
 ✅ Faça o pagamento
 ✅ O sistema confirma automaticamente
