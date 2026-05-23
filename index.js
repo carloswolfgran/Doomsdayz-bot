@@ -29,33 +29,59 @@ const client = new Client({
 const vipList = {
 
     1: {
-        nome: 'SOLDADO',
-        valor: 10
+        nome: 'APOIADOR SOLDADO',
+        valor: 10,
+        beneficios:
+`• Seguro do carro
+ • Manutenção mensal: R$5,00`
     },
 
     2: {
-        nome: 'CABO',
-        valor: 30
+        nome: 'APOIADOR CABO',
+        valor: 30,
+        beneficios:
+`• 1 carro civil de até 100.000 reais OU 100.000 em dinheiro
+ • Seguro do carro
+ • Manutenção mensal: R$10,00`
     },
 
     3: {
-        nome: 'SARGENTO',
-        valor: 45
+        nome: 'APOIADOR SARGENTO',
+        valor: 45,
+        beneficios:
+`• 1 carro civil de até 100.000 reais OU 100.000 em dinheiro
+ • Seguro do carro restaurável
+ • Manutenção mensal: R$15,00`
     },
 
     4: {
-        nome: 'OFICIAL',
-        valor: 60
+        nome: 'APOIADOR OFICIAL',
+        valor: 60,
+        beneficios:
+`• Qualquer carro do jogo (exceto loja de carros)
+ • Seguro do carro
+ • Seguro da base
+ • Manutenção mensal: R$20,00`
     },
 
     5: {
-        nome: 'TENENTE',
-        valor: 75
+        nome: 'APOIADOR TENENTE',
+        valor: 75,
+        beneficios:
+`• Qualquer carro do jogo (exceto loja de carros)
+ • Seguro do carro
+ • Conjunto DoomsDayZ Winter
+ • Manutenção mensal: R$25,00`
     },
 
     6: {
-        nome: 'PRIMEIRO TENENTE',
-        valor: 110
+        nome: 'APOIADOR 1° TENENTE',
+        valor: 110,
+        beneficios:
+`• Qualquer carro do jogo
+ • Seguro do carro
+ • Conjunto DoomsDayZ Winter Completo
+ • Manutenção mensal: R$35,00`
     }
 
 };
@@ -231,13 +257,19 @@ new AttachmentBuilder(buffer, {
 
 `💎 VIP ${vip.nome}
 
-💰 Valor: R$${vip.valor}
+ 💰 Valor: R$${vip.valor}
 
-PIX COPIA E COLA:
+━━━━━━━━━━━━━━━
 
-${pix}
+ ${vip.beneficios}
 
-Após pagar o sistema confirmará automaticamente.`,
+━━━━━━━━━━━━━━━
+
+ PIX COPIA E COLA:
+
+ ${pix}
+
+ ⚠️ Após pagar o sistema confirmará automaticamente.`,
 
                 files: [attachment]
 
