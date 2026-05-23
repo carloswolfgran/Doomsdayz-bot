@@ -135,29 +135,65 @@ client.once('ready', async () => {
             '1507532077221023764'
         );
 
-        await canal.send(
+       await canal.send(
 
 `💎 SISTEMA VIP DOOMSDAYZ 💎
 
 🔥 COMO COMPRAR SEU VIP
 
 💬 /vip 1
-➡️ SOLDADO — R$10
+➡️ APOIADOR SOLDADO — R$10
+
+• Seguro do carro
+• Manutenção mensal: R$5,00
+
+━━━━━━━━━━━━━━━
 
 💬 /vip 2
-➡️ CABO — R$30
+➡️ APOIADOR CABO — R$30
+
+• 1 carro civil de até 100.000 reais OU 100.000 em dinheiro
+• Seguro do carro
+• Manutenção mensal: R$10,00
+
+━━━━━━━━━━━━━━━
 
 💬 /vip 3
-➡️ SARGENTO — R$45
+➡️ APOIADOR SARGENTO — R$45
+
+• 1 carro civil de até 100.000 reais OU 100.000 em dinheiro
+• Seguro do carro restaurável
+• Manutenção mensal: R$15,00
+
+━━━━━━━━━━━━━━━
 
 💬 /vip 4
-➡️ OFICIAL — R$60
+➡️ APOIADOR OFICIAL — R$60
+
+• Qualquer carro do jogo (exceto loja de carros)
+• Seguro do carro
+• Seguro da base
+• Manutenção mensal: R$20,00
+
+━━━━━━━━━━━━━━━
 
 💬 /vip 5
-➡️ TENENTE — R$75
+➡️ APOIADOR TENENTE — R$75
+
+• Qualquer carro do jogo (exceto loja de carros)
+• Seguro do carro
+• Conjunto DoomsDayZ Winter
+• Manutenção mensal: R$25,00
+
+━━━━━━━━━━━━━━━
 
 💬 /vip 6
-➡️ PRIMEIRO TENENTE — R$110
+➡️ APOIADOR 1° TENENTE — R$110
+
+• Qualquer carro do jogo
+• Seguro do carro
+• Conjunto DoomsDayZ Winter Completo
+• Manutenção mensal: R$35,00
 
 ━━━━━━━━━━━━━━━
 
@@ -167,17 +203,11 @@ client.once('ready', async () => {
 ✅ Faça o pagamento
 ✅ O sistema confirma automaticamente
 
-━━━━━━━━━━━━━━━
-
-⚠️ IMPORTANTE
-
-• Aguarde a confirmação automática
-• Em caso de problemas abra ticket
+⚠️ Em caso de problemas abra ticket
 
 🔥 Obrigado por apoiar o DoomsDayZ!`
 
-        );
-
+);
     } catch (err) {
 
         console.log(err);
