@@ -5,10 +5,6 @@ const app = express();
 
 app.use(express.json());
 
-const fs = require('fs');
-
-const ftp = require('basic-ftp');
-
 const {
     Client,
     GatewayIntentBits,
@@ -30,15 +26,51 @@ const client = new Client({
     intents: [GatewayIntentBits.Guilds]
 });
 
+const vipList = {
+
+    1: {
+        nome: 'SOLDADO',
+        valor: 10
+    },
+
+    2: {
+        nome: 'CABO',
+        valor: 30
+    },
+
+    3: {
+        nome: 'SARGENTO',
+        valor: 45
+    },
+
+    4: {
+        nome: 'OFICIAL',
+        valor: 60
+    },
+
+    5: {
+        nome: 'TENENTE',
+        valor: 75
+    },
+
+    6: {
+        nome: 'PRIMEIRO TENENTE',
+        valor: 110
+    }
+
+};
+
 const commands = [
+
     new SlashCommandBuilder()
-        .setName('coins')
-        .setDescription('Comprar coins')
+        .setName('vip')
+        .setDescription('Comprar VIP')
         .addIntegerOption(option =>
-            option.setName('quantidade')
-                .setDescription('Quantidade')
+            option.setName('plano')
+                .setDescription('1 até 6')
                 .setRequired(true)
         )
+
 ].map(command => command.toJSON());
 
 const rest = new REST({ version: '10' })
@@ -66,84 +98,103 @@ const rest = new REST({ version: '10' })
 
 })();
 
-async function adicionarCoinsFTP(steamID, coins) {
+client.once('ready', async () => {
 
-    const clientFTP = new ftp.Client();
+    console.log(`Bot online como ${client.user.tag}`);
 
     try {
 
-        await clientFTP.access({
-            host: process.env.FTP_HOST,
-            port: Number(process.env.FTP_PORT),
-            user: process.env.FTP_USER,
-            password: process.env.FTP_PASS,
-            secure: "implicit"
-        });
-
-        console.log('Conectado no FTP');
-
-        const caminhoArquivo =
-'/profiles/FlameHost/Addons/Shop/Players/PlayerDatabase/' +
-`${steamID}.json`;
-
-        const arquivoLocal =
-`${steamID}.json`;
-
-        await clientFTP.downloadTo(
-            arquivoLocal,
-            caminhoArquivo
+        const canal =
+        await client.channels.fetch(
+            '1507532077221023764'
         );
 
-        console.log('Arquivo baixado');
+        await canal.send(
 
-        const dados =
-JSON.parse(
-    fs.readFileSync(arquivoLocal)
-);
+`💎 SISTEMA VIP DOOMSDAYZ 💎
 
-        dados.Balance += coins;
+🔥 COMO COMPRAR SEU VIP
 
-        fs.writeFileSync(
-            arquivoLocal,
-            JSON.stringify(dados, null, 4)
+💬 /vip 1
+➡️ SOLDADO — R$10
+
+💬 /vip 2
+➡️ CABO — R$30
+
+💬 /vip 3
+➡️ SARGENTO — R$45
+
+💬 /vip 4
+➡️ OFICIAL — R$60
+
+💬 /vip 5
+➡️ TENENTE — R$75
+
+💬 /vip 6
+➡️ PRIMEIRO TENENTE — R$110
+
+━━━━━━━━━━━━━━━
+
+💳 Após digitar o comando:
+
+✅ O bot irá gerar um PIX automático
+✅ Faça o pagamento
+✅ O sistema confirma automaticamente
+
+━━━━━━━━━━━━━━━
+
+⚠️ IMPORTANTE
+
+• Aguarde a confirmação automática
+• Em caso de problemas abra ticket
+
+🔥 Obrigado por apoiar o DoomsDayZ!`
+
         );
-
-        await clientFTP.uploadFrom(
-            arquivoLocal,
-            caminhoArquivo
-        );
-
-        console.log(
-`${coins} coins adicionadas para ${steamID}`
-        );
-
-        clientFTP.close();
 
     } catch (err) {
 
         console.log(err);
 
     }
-}
+
+});
 
 client.on('interactionCreate', async interaction => {
 
     if (!interaction.isChatInputCommand()) return;
 
-    if (interaction.commandName === 'coins') {
+    if (interaction.commandName === 'vip') {
 
         await interaction.deferReply({ ephemeral: true });
 
-        const quantidade =
-        interaction.options.getInteger('quantidade');
+        const plano =
+        interaction.options.getInteger('plano');
+
+        const vip =
+        vipList[plano];
+
+        if (!vip) {
+
+            return await interaction.editReply({
+                content: 'VIP inválido.'
+            });
+
+        }
 
         const payment_data = {
-            transaction_amount: quantidade,
-            description: `Coins DoomsDayZ`,
+
+            transaction_amount: vip.valor,
+
+            description:
+`VIP ${vip.nome} - DoomsDayZ`,
+
             payment_method_id: 'pix',
+
             payer: {
                 email: 'comprador@email.com'
             }
+
         };
 
         try {
@@ -167,12 +218,20 @@ new AttachmentBuilder(buffer, {
     name: 'pix.png'
 });
 
+            global.lastVip = {
+                id: payment.id,
+                vip: vip.nome,
+                valor: vip.valor,
+                usuario: interaction.user.username
+            };
+
             return await interaction.editReply({
 
                 content:
-`💰 PAGAMENTO PIX GERADO
 
-Valor: R$ ${quantidade}
+`💎 VIP ${vip.nome}
+
+💰 Valor: R$${vip.valor}
 
 PIX COPIA E COLA:
 
@@ -183,10 +242,6 @@ Após pagar o sistema confirmará automaticamente.`,
                 files: [attachment]
 
             });
-
-            console.log(
-`Pagamento criado: ${payment.id}`
-            );
 
         } catch (error) {
 
@@ -211,54 +266,40 @@ app.post('/webhook', async (req, res) => {
 
         console.log('Webhook recebido');
 
-        console.log(req.body);
-
         const paymentId = req.body.data.id;
-
-        console.log(`Pagamento ID: ${paymentId}`);
 
         const pagamento =
         await paymentClient.get({
             id: paymentId
         });
 
-        console.log(pagamento);
-
         if (pagamento.status === 'approved') {
 
             console.log('Pagamento aprovado');
 
-            const steamID =
-            "76561198792771416";
-
-            const coins =
-            Number(pagamento.transaction_amount) * 1000;
-
-            await adicionarCoinsFTP(
-                steamID,
-                coins
-            );
-
             const canal =
             await client.channels.fetch(
-                '1506835924221169774'
+                '1507532077221023764'
             );
 
             await canal.send(
 
-`✅ PAGAMENTO APROVADO
+`✅ NOVA COMPRA VIP
 
-💰 ${coins} DayZ Coins adicionadas.
+👤 Usuário:
+${global.lastVip.usuario}
+
+💎 VIP:
+${global.lastVip.vip}
+
+💰 Valor:
+R$${global.lastVip.valor}
 
 🧾 Pagamento ID:
 ${paymentId}
 
 🔥 Obrigado por apoiar o DoomsDayZ!`
 
-            );
-
-            console.log(
-`${coins} coins entregues`
             );
 
         }
